@@ -1,4 +1,5 @@
 
+using apis_web_services_fuel_manager.GraphQL;
 using apis_web_services_fuel_manager.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -13,6 +14,12 @@ namespace apis_web_services_fuel_manager
 
             // ADICIONA A CONFIGURAÇÃO PARA O BANCO DE DADOS
             builder.Services.AddDbContext<ApiDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services
+            .AddGraphQLServer()
+            .AddMutationType<Mutation>()
+            .AddQueryType<Query>()
+            .AddProjections().AddFiltering().AddSorting();
 
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
@@ -37,6 +44,8 @@ namespace apis_web_services_fuel_manager
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.MapGraphQL("/graphql");
 
             // EXECUTA OS MIGFRATIONS NO BANCO DE DADOS
             using (var scope = app.Services.CreateScope())
